@@ -22,6 +22,7 @@ public class AcomodacaoService {
 
     // Métodos públicos
 
+    // Método que interage com banco de dados para listar todos os elementos de acomodacao
     public String listar() throws AcomodacaoException {
         ArrayList<Acomodacao> acomodacaos = acomodacaoDAO.selecionar();
         String lista = "";
@@ -35,22 +36,23 @@ public class AcomodacaoService {
         return lista;
     }
 
+    // Método que valida todas as informações recebidas e interage com banco de dados para cadastrar um elemento em acomodacao
     public String cadastrar(
             String nome,
             Double valorDiaria,
             Integer limiteHospedes,
             String descricao,
-            Funcionario funcionarioResponsavel
+            Long idFuncionarioResponsavel
     ) throws AcomodacaoException {
-//        String mensagemErro = validarCampos(Funcionalidade.CADASTRAR, null, nomeCompleto, dataNascimentoFormatoBR, documento);
-//        if(!mensagemErro.equals("")) throw new AcomodacaoException(mensagemErro);
+        String mensagemErro = validarCampos(Funcionalidade.CADASTRAR, null, nome, valorDiaria, limiteHospedes, idFuncionarioResponsavel);
+        if(!mensagemErro.equals("")) throw new AcomodacaoException(mensagemErro);
 
         Acomodacao acomodacao = new Acomodacao(
                 nome,
                 valorDiaria,
                 limiteHospedes,
                 descricao,
-                funcionarioResponsavel
+                acomodacaoDAO.getFuncionario(idFuncionarioResponsavel)
         );
 
         if (acomodacaoDAO.inserir(acomodacao)) {
@@ -60,16 +62,17 @@ public class AcomodacaoService {
         }
     }
 
+    // Método que valida todas as informações recebidas e interage com banco de dados para alterar um elemento já existente de acomodacao
     public String alterar(
             Long id,
             String nome,
             Double valorDiaria,
             Integer limiteHospedes,
             String descricao,
-            Funcionario funcionarioResponsavel
+            Long idFuncionarioResponsavel
     ) throws AcomodacaoException {
-//        String mensagemErro = validarCampos(Funcionalidade.ALTERAR, id, nomeCompleto, dataNascimentoFormatoBR, documento);
-//        if(!mensagemErro.equals("")) throw new AcomodacaoException(mensagemErro);
+        String mensagemErro = validarCampos(Funcionalidade.ALTERAR, id, nome, valorDiaria, limiteHospedes, idFuncionarioResponsavel);
+        if(!mensagemErro.equals("")) throw new AcomodacaoException(mensagemErro);
 
         Acomodacao acomodacao = new Acomodacao(
                 id,
@@ -77,7 +80,7 @@ public class AcomodacaoService {
                 valorDiaria,
                 limiteHospedes,
                 descricao,
-                funcionarioResponsavel
+                acomodacaoDAO.getFuncionario(idFuncionarioResponsavel)
         );
 
         if (acomodacaoDAO.atualizar(acomodacao)) {
@@ -87,8 +90,9 @@ public class AcomodacaoService {
         }
     }
 
+    // Método que valida todas as informações recebidas e interage com banco de dados para excluir um elemento já existente de acomodacao
     public String excluir(Long id) throws AcomodacaoException {
-        String mensagemErro = validarCampos(Funcionalidade.EXCLUIR, id, null, null, null);
+        String mensagemErro = validarCampos(Funcionalidade.EXCLUIR, id, null, null, null, null);
         if (!mensagemErro.equals("")) throw new AcomodacaoException(mensagemErro);
 
         if (acomodacaoDAO.deletar(id)) {
@@ -98,6 +102,7 @@ public class AcomodacaoService {
         }
     }
 
+    // Recebe pelo DAO o id do elemento de teste
     public Long targetId() throws AcomodacaoException {
         return acomodacaoDAO.targetId();
     }
@@ -107,9 +112,10 @@ public class AcomodacaoService {
     private String validarCampos(
             Funcionalidade funcionalidade,
             Long id,
-            String nomeCompleto,
-            String dataNascimentoFormatoBR,
-            String documento
+            String nome,
+            Double valorDiaria,
+            Integer limiteHospedes,
+            Long idFuncionarioResponsavel
     ) throws AcomodacaoException {
         String erros = "";
         // Verificação de id
@@ -122,19 +128,26 @@ public class AcomodacaoService {
         }
         // Verificação de outros campos
         if (funcionalidade == Funcionalidade.CADASTRAR || funcionalidade == Funcionalidade.ALTERAR) {
-            // Nome completo
-            if (nomeCompleto == null || nomeCompleto.trim().equals("")) {
-                erros += "\n- Nome completo é obrigatório.";
+            // Nome
+            if (nome == null || nome.trim().equals("")) {
+                erros += "\n- Nome é obrigatório.";
             }
-            // Data de nascimento
-            if (dataNascimentoFormatoBR == null || dataNascimentoFormatoBR.trim().equals("")) {
-                erros += "\n- Data de nascimento é obrigatória.";
-            } else if (!Util.validarDataFormatoBR(dataNascimentoFormatoBR)) {
-                erros += "\n- Data de nascimento inválida.";
+
+            // Valor diaria
+            if (valorDiaria == null) {
+                erros += "\n- Valor da diária é obrigatório.";
             }
-            // Documento
-            if (documento == null || documento.trim().equals("")) {
-                erros += "\n- Documento é obrigatório.";
+
+            // Limite hospedes
+            if (limiteHospedes == null) {
+                erros += "\n- Limite de hóspedes é obrigatório.";
+            }
+
+            // Id funcionario responsavel
+            if (idFuncionarioResponsavel == null) {
+                erros += "\n- Id do funcionário resposável é obrigatório.";
+            } else if (acomodacaoDAO.getFuncionario(idFuncionarioResponsavel) == null) {
+                erros += "\n- Id do funcionário resposável não encontrado.";
             }
         }
 

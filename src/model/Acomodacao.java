@@ -100,8 +100,8 @@ public class Acomodacao {
                 " | Limite de hóspedes: " + limiteHospedes +
                 " | Descrição: " + descricao +
                 " | Funcionário responsável: " +
-                funcionarioResponsavel.getId() + " - " +
-                funcionarioResponsavel.getNomeCompleto();
+                funcionarioResponsavel.getId() + " (" +
+                funcionarioResponsavel.getNomeCompleto() + ")";
     }
 
     /*Compara se dois objetos Acomodacao são iguais com base no id.*/

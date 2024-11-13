@@ -11,8 +11,9 @@ import java.util.ArrayList;
 
 public class AcomodacaoDAO implements DAO<Acomodacao> {
 
-    // Métodos de interação com banco de dados
+    // Métodos que interagem com o banco de dados
 
+    // Método para selecionar todos os elementos de acomodacao no banco de dados
     public ArrayList<Acomodacao> selecionar() throws AcomodacaoException {
         try {
             String sql = "SELECT " +
@@ -45,6 +46,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
         }
     }
 
+    // Método que cria um novo elemento de acomodação no banco de dados
     public Boolean inserir(Acomodacao acomodacao) throws AcomodacaoException {
         try {
             String sql = "INSERT INTO acomodacao" +
@@ -56,7 +58,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
             preparacao.setDouble(2, acomodacao.getValorDiaria());
             preparacao.setInt(3, acomodacao.getLimiteHospedes());
             preparacao.setString(4, acomodacao.getDescricao());
-            preparacao.setInt(5, 1);
+            preparacao.setLong(5, acomodacao.getFuncionarioResponsavel().getId());
             return preparacao.executeUpdate() > 0;
 
         } catch (Exception e) {
@@ -64,6 +66,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
         }
     }
 
+    // Método que atualiza algum elemento já existente em acomodacao no banco de dados
     public Boolean atualizar(Acomodacao acomodacao) throws AcomodacaoException {
         try {
             String sql = "UPDATE acomodacao " +
@@ -80,7 +83,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
             preparacao.setDouble(2, acomodacao.getValorDiaria());
             preparacao.setInt(3, acomodacao.getLimiteHospedes());
             preparacao.setString(4, acomodacao.getDescricao());
-            preparacao.setInt(5, 1);
+            preparacao.setLong(5, acomodacao.getFuncionarioResponsavel().getId());
             preparacao.setLong(6, acomodacao.getId());
             return preparacao.executeUpdate() > 0;
 
@@ -88,6 +91,8 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
             throw new AcomodacaoException("Erro desconhecido! Por favor, tente novamente mais tarde.");
         }
     }
+
+    // Método que exclui algum elemento já existente em acomodacao no banco de dados
     public Boolean deletar(Long id) throws AcomodacaoException {
         try {
             String sql = "DELETE FROM acomodacao WHERE id = ?";
@@ -100,6 +105,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
         }
     }
 
+    // Método que procura e captura todos as informações de um funcionario no banco de dados
     public Funcionario getFuncionario(Long id) throws AcomodacaoException {
         try {
             String sql = "SELECT " +
@@ -136,6 +142,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
         }
     }
 
+    // Método que procura e captura todos as informações de uma pessoa no banco de dados
     public Pessoa getPessoa(Long id) throws AcomodacaoException {
         try {
             String sql = "SELECT " +
@@ -171,6 +178,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
         }
     }
 
+    // Método que descobri qual é o elemento de teste
     public Long targetId() throws AcomodacaoException {
         try {
             String sql = "SELECT " +
@@ -190,9 +198,11 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
         }
     }
 
+    // Método que procura e captura todos as informações de uma acomodacao no banco de dados
     public Acomodacao selecionarPorId(Long id) throws AcomodacaoException {
         try {
             String sql = "SELECT " +
+                    "id, " +
                     "id, " +
                     "nome, " +
                     "valor_diaria, " +
@@ -212,17 +222,7 @@ public class AcomodacaoDAO implements DAO<Acomodacao> {
                         resultado.getDouble("valor_diaria"),
                         resultado.getInt("limite_hospedes"),
                         resultado.getString("descricao"),
-                        new Funcionario(
-                                resultado.getLong("id_funcionario_responsavel"),
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null)
+                        getFuncionario(resultado.getLong("id_funcionario_responsavel"))
                 );
             } else {
                 return null;
